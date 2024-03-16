@@ -1,0 +1,222 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Feb 18 00:52:44 2024
+
+@author: ysheikh
+"""
+import random 
+
+
+# global variables 
+c = "Car (🚗)"
+g = "Goat (🐐)"
+
+# state of the game as viewer by the player
+PICK = "*"
+UNKNOWN = "?"
+
+# intializing game_state
+game_state = [] 
+
+###################################################
+
+# HW - Part 1
+def playSingleGame(num_doors):
+    
+    # Call a function to generate a list of door contents, 1 CAR and num_doors-1 GOATs
+    generateDoors(num_doors)
+
+    # Call a function to generate the initial game state, all UNKNOWN
+    generateGameState(num_doors)
+    door_contents = generateDoors(num_doors)
+    
+    # Print out the initial game state
+    game_state = generateGameState(num_doors)
+    print("\nGame: ", game_state)
+    
+    # Ask the user to pick a door
+    user_pick = int(input(f"\nPlease pick door between 0 and {num_doors - 1} : "))
+     
+    # Update the game state to change the user's pick from UNKNOWN to PICK
+    game_state[user_pick] = PICK          
+
+    # Print the game state again
+    print("\nGame: ", game_state)
+
+    # Call a function to update the game state to reveal goats, leave the user's pick and 1 other UNKNOWN untouched
+    revealGoats(game_state, door_contents)
+
+    # Print to Revealing the goats!
+    print("\nRevealing the goats!")
+
+    # Print the game state again
+    print("\nGame: ", game_state)
+
+    # Ask the user if they want to switch, y or n
+    switch = input("\nWould you like to swtich your door (y/n): ")
+    
+    # If they want to switch:
+    if switch == "y":
+
+#        print("----------")
+#        print("Before swap")         
+#        
+        # Find the index of the user's current PICK
+#        print("PICK = " , game_state.index(PICK))
+#        
+        # Find the index of the remaining UNKNOWN
+#        print("UNKNOW =" , game_state.index(UNKNOWN))
+#        print("----------")
+#        print("----------")
+        
+       
+        # Swap them
+        index_of_PICK = game_state.index(PICK)
+        index_of_UNKNOWN = game_state.index(UNKNOWN)
+        
+        # location swapping 
+        game_state[index_of_PICK], game_state[index_of_UNKNOWN] = game_state[index_of_UNKNOWN], game_state[index_of_PICK]
+        
+#        # After swap
+#        print("----------")
+#        print("----------")
+#        print("After swap")         
+#        print("PICK = " , game_state.index(PICK))
+#        print("UNKNOW =" , game_state.index(UNKNOWN))
+#        print("----------")
+#
+        
+        # Print the game state again
+        # print("\nGame: ", game_state)
+        
+
+    # Print the user's pick
+    print("You picked door: ", game_state.index(PICK))
+    
+    
+    # Print out the underlying door contents
+    print("The door contents were: \n", door_contents)
+    
+    # If the index of the user's PICK == the index of the CAR:
+    if door_contents[game_state.index(PICK)] == c:
+        # Print that the user won!
+        print("You won the car!")
+    # Else:
+    # Print that the user lost!
+    else:
+        print("You lost!")
+
+###################################################
+
+# HW - Part 2
+def simulateSingleGame(num_doors, num_simulations):
+    wins = 0
+    losses = 0
+
+    for i in range(0, num_simulations):
+        # Call a function to generate a list of door contents, 1 CAR and num_doors-1 GOATs
+        door_contents = generateDoors(num_doors)
+        #print("----------")
+        #print("door_contents: ", door_contents)
+        
+        # Call a function to generate the initial game state, all UNKNOWN
+        game_state = generateGameState(num_doors)
+        #print("----------")
+        #print("game_state: ", game_state)
+        #print("num_doors: ", num_doors)
+        
+        # Pick a door randomly to represent the user's pick
+        random_pick = random.randint(1, num_doors -1)
+        #print("----------")
+        #print("random_pick: ", random_pick)
+
+        # Update the game state to change the user's pick from UNKNOWN to PICK
+        game_state[random_pick] = PICK
+        
+        # Call a function to update the game state to reveal goats, leave the user's pick and 1 other UNKNOWN untouched
+        revealGoats(game_state, door_contents)
+        #print("----------")
+        #print("Reveal goats - game_state:", game_state)
+        
+        # Have the user switch:
+
+        #     Find the index of the user's current PICK
+        index_of_PICK = game_state.index(PICK)
+        
+        #     Find the index of the remaining UNKNOWN
+        index_of_UNKNOWN = game_state.index(UNKNOWN)
+        
+        #     Swap them
+        game_state[index_of_PICK], game_state[index_of_UNKNOWN] = game_state[index_of_UNKNOWN], game_state[index_of_PICK]
+
+        # If the index of the user's PICK == the index of the CAR:
+        if door_contents[random_pick] == c:
+            wins += 1
+        else:
+            losses += 1
+            
+    #print("Wins = " , wins)
+    #print("Loses = " , losses) 
+  
+    print(f"There were {wins} wins and {losses} losses")
+    print(f"So keeping the original door wins with probability {wins/num_simulations*100:.2f}%, and switching wins with probability {losses/num_simulations*100:.2f}%")
+ 
+    
+###################################################
+
+# Generate Doors and contents 
+def generateDoors(num_doors):
+    door_contents = []
+    door_contents.append(c)
+    for i in range(num_doors - 1):
+        door_contents.append(g)
+    random.shuffle(door_contents)
+    return (door_contents)
+
+# Call a function to generate the initial game state, all UNKNOWN
+def generateGameState(num_doors):        
+    return [UNKNOWN] * num_doors
+
+
+def  revealGoats(game_state, door_contents): 
+    to_open = len(door_contents) - 2
+    count = 0
+    while count < to_open:
+        # Pick a random door
+        random_door = random.randint(0, len(game_state) - 1)
+        # Check if the door is closed, not the user's pick, and not containing the car
+        if game_state[random_door] == UNKNOWN and door_contents[random_door] == g:
+            # Open the door
+            game_state[random_door] = door_contents[random_door]
+            count += 1
+    return game_state
+
+###################################################
+
+def main():
+    print("Starting Monty Hall Game!!!")
+    play_again = "y"
+    
+    while play_again == "y":
+        # Ask the user if they want to run a single game (a), or run a simulation (b)
+        user_choice = input("Would you like to play a single game (a), or run a simulation (b): ")
+        
+        if user_choice == 'a':
+            print("\nStarting single game (a)\n")
+            num_doors = int(input("How many doors would you like to play with: "))
+            # call the playSingleGame function
+            playSingleGame(num_doors)
+            
+        else: 
+            # call the simulateSingleGame function
+            print("\nStarting Simulation (b)\n")
+            num_doors = int(input("How many doors would you like to play with: "))
+            num_simulations = int(input("How many simulations would you like to run: "))            # call the simulateSingleGame function
+            simulateSingleGame(num_doors, num_simulations)
+    
+        play_again = input("\nWould you like to play again (y/n): ")
+
+
+if __name__ == "__main__":
+    main()
